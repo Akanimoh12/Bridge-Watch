@@ -7,6 +7,13 @@ import { usePreferences } from "../context/PreferencesContext";
 import { useToast } from "../context/ToastContext";
 import { useNotificationContext } from "../hooks/useNotificationContext";
 import { useThemeStore, selectDensity } from "../stores/themeStore";
+import { Tabs, TabList, Tab, TabPanel } from "../components/Tabs";
+
+const refreshOptions = [
+  { value: 30000, label: "30s" },
+  { value: 60000, label: "1m" },
+  { value: 120000, label: "2m" },
+] as const;
 
 export default function Settings() {
   const { prefs, setPrefs } = usePreferences();
