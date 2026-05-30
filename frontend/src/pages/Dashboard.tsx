@@ -532,7 +532,7 @@ export default function Dashboard() {
             value={
               bridgesLoading
                 ? "--"
-                : bridgesData?.bridges.filter((b: any) => b.status !== "down").length || 0
+                : bridgesData?.bridges.filter((b: { status: string }) => b.status !== "down").length || 0
             }
             loading={bridgesLoading}
             icon="🌉"

@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useWatchlist } from "../hooks/useWatchlist";
-import NotificationsDrawer from "./NotificationsDrawer";
-import UnreadCountBadge from "./UnreadCountBadge";
-import { useNotificationLiveUpdates } from "../hooks/useNotificationLiveUpdates";
-import { selectUnreadCount, useNotificationStore } from "../stores/notificationStore";
 
 const NAV_LINKS = [
   { to: "/", label: "Dashboard" },

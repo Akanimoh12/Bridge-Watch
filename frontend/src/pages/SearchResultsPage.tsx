@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { searchIndexed, type IndexedSearchResult } from "../services/api";
 
@@ -216,7 +216,6 @@ function Pagination({
 
 export default function SearchResultsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const queryParam = searchParams.get("q") ?? "";

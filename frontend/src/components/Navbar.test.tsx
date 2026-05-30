@@ -8,11 +8,16 @@ import ThemeProvider from "../theme/ThemeProvider";
 import Navbar from "./Navbar";
 import { useNotificationStore } from "../stores/notificationStore";
 
+const queryClient = new QueryClient();
+
 function resetNotifications() {
   useNotificationStore.setState(useNotificationStore.getInitialState(), true);
 }
 
 describe("Navbar", () => {
+  beforeEach(() => {
+    resetNotifications();
+  });
   it("toggles the mobile navigation panel", () => {
     render(
       <MemoryRouter>
