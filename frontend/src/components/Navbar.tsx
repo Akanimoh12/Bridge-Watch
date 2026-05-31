@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { to: "/analytics", label: "Analytics" },
   { to: "/watchlists", label: "Watchlists" },
   { to: "/incidents", label: "Incidents" },
+  { to: "/alerts", label: "Alerts" },
 ];
 
 function matchesRoute(pathname: string, to: string): boolean {
