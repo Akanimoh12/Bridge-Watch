@@ -26,6 +26,8 @@ import DrilldownDrawer, {
   type DrilldownContext,
 } from "../components/dashboard/DrilldownDrawer";
 import DashboardSharingModal from "../components/dashboard/DashboardSharingModal";
+import AssetInsightsTray from "../components/asset/AssetInsightsTray";
+import { useUIStore, selectInsightsTray } from "../stores/uiStore";
 import type { AssetWithHealth, Bridge, FilterStatus } from "../types";
 
 type DashboardView = "overview" | "assets" | "bridges";
@@ -146,6 +148,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [exportPickerOpen, setExportPickerOpen] = useState(false);
   const [sharingOpen, setSharingOpen] = useState(false);
+  const { open: insightsTrayOpen, symbol: insightsTraySymbol, closeInsightsTray } =
+    useUIStore(selectInsightsTray);
   const {
     data: assetsWithHealth,
     isLoading: assetsLoading,
@@ -651,6 +655,14 @@ export default function Dashboard() {
         context={activeDrilldown}
         onClose={() => setDrilldown(null)}
         onBack={() => setDrilldown(null)}
+      />
+      <AssetInsightsTray
+        open={insightsTrayOpen}
+        symbol={insightsTraySymbol}
+        assetName={
+          assetsWithHealth?.find((a) => a.symbol === insightsTraySymbol)?.name ?? null
+        }
+        onClose={closeInsightsTray}
       />
     </div>
   );
