@@ -1,15 +1,20 @@
 import { Suspense, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useBridges } from "../hooks/useBridges";
 import { useFavorites } from "../hooks/useFavorites";
 import { useRefreshControls } from "../hooks/useRefreshControls";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import BridgeStatusCard from "../components/BridgeStatusCard";
+import BridgeNotesPanel from "../components/BridgeNotesPanel";
 import FavoriteTagChip from "../components/favorites/FavoriteTagChip";
 import RefreshControls from "../components/RefreshControls";
 import PullToRefresh from "../components/PullToRefresh";
 import { SkeletonCard, ErrorBoundary } from "../components/Skeleton";
 
 export default function Bridges() {
+  const [searchParams] = useSearchParams();
+  const selectedBridge = searchParams.get("selected") ?? null;
+
   const {
     favoritesFilterMode,
     setFavoritesFilterMode,
@@ -185,6 +190,10 @@ export default function Bridges() {
           </table>
         </div>
       </div>
+      {/* Bridge notes panel — shown when a bridge card is clicked */}
+      {selectedBridge && (
+        <BridgeNotesPanel bridgeName={selectedBridge} />
+      )}
     </div>
   );
 }
