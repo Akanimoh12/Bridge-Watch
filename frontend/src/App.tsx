@@ -28,6 +28,7 @@ const RelationshipExplorer = lazy(() => import("./pages/RelationshipExplorer"));
 const SearchResultsPage = lazy(() => import("./pages/SearchResultsPage"));
 const Alerts = lazy(() => import("./pages/Alerts"));
 const DataProvenanceGraph = lazy(() => import("./pages/DataProvenanceGraph"));
+const AlertSimulationSandbox = lazy(() => import("./pages/AlertSimulationSandbox"));
 
 function NotificationInitializer() {
   useNotifications();
@@ -72,6 +73,7 @@ function App() {
               <Route path="/relationship-explorer" element={<RelationshipExplorer />} />
               <Route path="/search" element={<SearchResultsPage />} />
               <Route path="/data-provenance" element={<DataProvenanceGraph />} />
+              <Route path="/alert-sandbox" element={<AlertSimulationSandbox />} />
             </Route>
           </Routes>
         </Suspense>

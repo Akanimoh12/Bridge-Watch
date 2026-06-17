@@ -37,6 +37,11 @@ export const navGroups: NavGroup[] = [
         label: "Alert Routing",
         description: "Manage alert dispatch routing and audit",
       },
+      {
+        to: "/alert-sandbox",
+        label: "Alert Sandbox",
+        description: "Dry-run alert rules against synthetic data before enabling in production",
+      },
       { to: "/settings", label: "Settings", description: "Notification and dashboard preferences" },
     ],
   },
