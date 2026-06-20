@@ -1101,7 +1101,9 @@ impl AssetRegistryContract {
         }
 
         whitelist.push_back(asset_code.clone());
-        env.storage().instance().set(&DataKey::Whitelist, &whitelist);
+        env.storage()
+            .instance()
+            .set(&DataKey::Whitelist, &whitelist);
 
         env.events()
             .publish((symbol_short!("wl_add"), asset_code), 1u32);
@@ -1236,10 +1238,8 @@ impl AssetRegistryContract {
 
     /// Check if an asset is currently frozen. Public read.
     pub fn is_asset_frozen(env: Env, asset_code: String) -> bool {
-        let frozen: Option<FrozenAsset> = env
-            .storage()
-            .persistent()
-            .get(&DataKey::Frozen(asset_code));
+        let frozen: Option<FrozenAsset> =
+            env.storage().persistent().get(&DataKey::Frozen(asset_code));
 
         match frozen {
             Some(f) => f.is_frozen,
@@ -1249,9 +1249,7 @@ impl AssetRegistryContract {
 
     /// Get the frozen state of an asset. Public read.
     pub fn get_frozen_state(env: Env, asset_code: String) -> Option<FrozenAsset> {
-        env.storage()
-            .persistent()
-            .get(&DataKey::Frozen(asset_code))
+        env.storage().persistent().get(&DataKey::Frozen(asset_code))
     }
 
     // =======================================================================
@@ -1957,11 +1955,8 @@ mod tests {
         let (env, client, admin) = setup();
         let nonexistent = String::from_str(&env, "FAKE");
 
-        let result = client.try_deactivate_asset(
-            &admin,
-            &nonexistent,
-            &String::from_str(&env, "Attempt"),
-        );
+        let result =
+            client.try_deactivate_asset(&admin, &nonexistent, &String::from_str(&env, "Attempt"));
         assert_eq!(result, Err(Ok(RegistryError::AssetNotFound)));
     }
 
@@ -2014,11 +2009,7 @@ mod tests {
         client.initialize(&admin);
         let asset_code = register_usdc(&env, &client, &admin);
         client.update_status(&admin, &asset_code, &AssetStatus::Active);
-        client.deactivate_asset(
-            &admin,
-            &asset_code,
-            &String::from_str(&env, "Temporary"),
-        );
+        client.deactivate_asset(&admin, &asset_code, &String::from_str(&env, "Temporary"));
 
         // Try to restore from unauthorized address
         let result = client.try_restore_asset(&unauthorized, &asset_code);
@@ -2091,11 +2082,7 @@ mod tests {
         let base_meta = client.get_asset(&asset_code).unwrap();
 
         // Deactivate
-        client.deactivate_asset(
-            &admin,
-            &asset_code,
-            &String::from_str(&env, "Archived"),
-        );
+        client.deactivate_asset(&admin, &asset_code, &String::from_str(&env, "Archived"));
 
         // Restore
         client.restore_asset(&admin, &asset_code);
@@ -2872,11 +2859,7 @@ mod tests {
         let (env, client, admin) = setup();
         let asset_code = register_usdc(&env, &client, &admin);
 
-        client.freeze_asset(
-            &admin,
-            &asset_code,
-            &String::from_str(&env, "Asset frozen"),
-        );
+        client.freeze_asset(&admin, &asset_code, &String::from_str(&env, "Asset frozen"));
 
         let result = client.try_update_metadata(
             &admin,
@@ -2909,11 +2892,8 @@ mod tests {
         let stranger = Address::generate(&env);
         let asset_code = register_usdc(&env, &client, &admin);
 
-        let result = client.try_freeze_asset(
-            &stranger,
-            &asset_code,
-            &String::from_str(&env, "reason"),
-        );
+        let result =
+            client.try_freeze_asset(&stranger, &asset_code, &String::from_str(&env, "reason"));
         assert_eq!(result, Err(Ok(RegistryError::NotAuthorized)));
     }
 

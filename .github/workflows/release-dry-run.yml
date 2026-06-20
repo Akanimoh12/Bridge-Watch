@@ -89,6 +89,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Lowercase repository name
+        id: repo
+        run: echo "name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -105,8 +109,8 @@ jobs:
           file: ./backend/Dockerfile
           push: false
           tags: |
-            ghcr.io/${{ github.repository }}/backend:${{ needs.validate-version.outputs.version }}
-            ghcr.io/${{ github.repository }}/backend:dryrun
+            ghcr.io/${{ steps.repo.outputs.name }}/backend:${{ needs.validate-version.outputs.version }}
+            ghcr.io/${{ steps.repo.outputs.name }}/backend:dryrun
 
       - name: Build frontend image (dry-run)
         uses: docker/build-push-action@v5
@@ -115,8 +119,8 @@ jobs:
           file: ./frontend/Dockerfile
           push: false
           tags: |
-            ghcr.io/${{ github.repository }}/frontend:${{ needs.validate-version.outputs.version }}
-            ghcr.io/${{ github.repository }}/frontend:dryrun
+            ghcr.io/${{ steps.repo.outputs.name }}/frontend:${{ needs.validate-version.outputs.version }}
+            ghcr.io/${{ steps.repo.outputs.name }}/frontend:dryrun
         continue-on-error: true
 
       - name: Report Docker build status

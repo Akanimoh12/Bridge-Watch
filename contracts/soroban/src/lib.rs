@@ -15,6 +15,7 @@ pub mod governance;
 #[cfg(test)]
 pub mod insurance_pool;
 pub mod liquidity_pool;
+pub mod migration;
 #[cfg(test)]
 pub mod multisig_treasury;
 #[cfg(test)]
@@ -22,7 +23,6 @@ pub mod rate_limiter;
 #[cfg(test)]
 pub mod reputation_system;
 pub mod source_trust;
-pub mod migration;
 pub mod state_export;
 use soroban_sdk::{
     contract, contractimpl, contracttype, symbol_short, Address, Bytes, BytesN, Env, String, Vec,
@@ -1063,7 +1063,6 @@ pub enum HealthSourceDataKey {
 // ---------------------------------------------------------------------------
 // Admin Activity Service types (issue #299)
 // ---------------------------------------------------------------------------
->>>>>>> upstream/main
 
 /// Categories of admin actions captured by the activity log.
 #[contracttype]
@@ -1201,14 +1200,14 @@ impl BridgeWatchContract {
         bridge_uptime_score: u32,
     ) {
         Self::check_permission(&env, &caller, AdminRole::HealthSubmitter);
-        
+
         // Check if caller is a trusted source (if any sources are registered)
         let active_sources = source_trust::get_active_trusted_sources(&env);
         if active_sources.len() > 0 {
             // If sources are registered, enforce trust requirement
             source_trust::require_trusted_source(&env, &caller);
         }
-        
+
         let status = Self::load_asset_health(&env, &asset_code);
         Self::assert_asset_accepting_submissions(&status);
         let timestamp = env.ledger().timestamp();
@@ -1234,8 +1233,10 @@ impl BridgeWatchContract {
             .persistent()
             .set(&AssetDataKey::Health(asset_code.clone()), &record);
 
-        env.events()
-            .publish((symbol_short!("health_up"), asset_code.clone()), health_score);
+        env.events().publish(
+            (symbol_short!("health_up"), asset_code.clone()),
+            health_score,
+        );
         Self::append_replay_event(
             &env,
             String::from_str(&env, "health_up"),
@@ -1320,14 +1321,14 @@ impl BridgeWatchContract {
         source: String,
     ) {
         Self::check_permission(&env, &caller, AdminRole::PriceSubmitter);
-        
+
         // Check if caller is a trusted source (if any sources are registered)
         let active_sources = source_trust::get_active_trusted_sources(&env);
         if active_sources.len() > 0 {
             // If sources are registered, enforce trust requirement
             source_trust::require_trusted_source(&env, &caller);
         }
-        
+
         let status = Self::load_asset_health(&env, &asset_code);
         Self::assert_asset_accepting_submissions(&status);
         let timestamp = env.ledger().timestamp();
@@ -1874,10 +1875,9 @@ impl BridgeWatchContract {
                 Some(record) => {
                     state_export::StateExportHelper::build_asset_snapshot_from_health(env, &record)
                 }
-                None => state_export::StateExportHelper::build_empty_asset_snapshot(
-                    env,
-                    asset_code,
-                ),
+                None => {
+                    state_export::StateExportHelper::build_empty_asset_snapshot(env, asset_code)
+                }
             };
             snapshots.push_back(snapshot);
         }
@@ -5014,9 +5014,7 @@ impl BridgeWatchContract {
     }
 
     fn tier_rank(tier: &StatusTier) -> u32 {
-
         match tier {
-
             StatusTier::Ok => 0,
 
             StatusTier::Low => 1,
@@ -5024,106 +5022,61 @@ impl BridgeWatchContract {
             StatusTier::Medium => 2,
 
             StatusTier::High => 3,
-
         }
-
     }
-
 
     fn max_tier(a: StatusTier, b: StatusTier) -> StatusTier {
-
         if Self::tier_rank(&a) >= Self::tier_rank(&b) {
-
             a
-
         } else {
-
             b
-
         }
-
     }
-
 
     fn health_to_tier(score: u32) -> StatusTier {
-
         if score >= 80 {
-
             StatusTier::Ok
-
         } else if score >= 60 {
-
             StatusTier::Low
-
         } else if score >= 40 {
-
             StatusTier::Medium
-
         } else {
-
             StatusTier::High
-
         }
-
     }
 
-
     fn deviation_to_tier(alert: &Option<DeviationAlert>) -> (bool, StatusTier) {
-
         match alert {
-
             None => (false, StatusTier::Ok),
 
             Some(a) => match a.severity {
-
                 DeviationSeverity::Low => (true, StatusTier::Low),
 
                 DeviationSeverity::Medium => (true, StatusTier::Medium),
 
                 DeviationSeverity::High => (true, StatusTier::High),
-
             },
-
         }
-
     }
-
 
     fn compute_contract_tier_from_counts(rollup: &ContractStatusRollup) -> StatusTier {
-
         if rollup.asset_high > 0 || rollup.bridge_high > 0 {
-
             StatusTier::High
-
         } else if rollup.asset_medium > 0 || rollup.bridge_medium > 0 {
-
             StatusTier::Medium
-
         } else if rollup.asset_low > 0 || rollup.bridge_low > 0 {
-
             StatusTier::Low
-
         } else {
-
             StatusTier::Ok
-
         }
-
     }
 
-
     fn bump_contract_counts_for_asset(env: &Env, prev: Option<StatusTier>, next: StatusTier) {
-
         let mut rollup: ContractStatusRollup = env
-
             .storage()
-
             .persistent()
-
             .get(&DataKey::ContractStatusRollup)
-
             .unwrap_or(ContractStatusRollup {
-
                 tier: StatusTier::Ok,
 
                 asset_ok: 0,
@@ -5143,14 +5096,10 @@ impl BridgeWatchContract {
                 bridge_high: 0,
 
                 timestamp: env.ledger().timestamp(),
-
             });
 
-
         if let Some(p) = prev {
-
             match p {
-
                 StatusTier::Ok => rollup.asset_ok = rollup.asset_ok.saturating_sub(1),
 
                 StatusTier::Low => rollup.asset_low = rollup.asset_low.saturating_sub(1),
@@ -5158,14 +5107,10 @@ impl BridgeWatchContract {
                 StatusTier::Medium => rollup.asset_medium = rollup.asset_medium.saturating_sub(1),
 
                 StatusTier::High => rollup.asset_high = rollup.asset_high.saturating_sub(1),
-
             }
-
         }
 
-
         match next {
-
             StatusTier::Ok => rollup.asset_ok += 1,
 
             StatusTier::Low => rollup.asset_low += 1,
@@ -5173,39 +5118,26 @@ impl BridgeWatchContract {
             StatusTier::Medium => rollup.asset_medium += 1,
 
             StatusTier::High => rollup.asset_high += 1,
-
         }
-
 
         rollup.tier = Self::compute_contract_tier_from_counts(&rollup);
 
         rollup.timestamp = env.ledger().timestamp();
 
-
         env.storage()
-
             .persistent()
-
             .set(&DataKey::ContractStatusRollup, &rollup);
 
-
-        env.events().publish((symbol_short!("ctr_st"),), rollup.tier.clone());
-
+        env.events()
+            .publish((symbol_short!("ctr_st"),), rollup.tier.clone());
     }
 
-
     fn bump_contract_counts_for_bridge(env: &Env, prev: Option<StatusTier>, next: StatusTier) {
-
         let mut rollup: ContractStatusRollup = env
-
             .storage()
-
             .persistent()
-
             .get(&DataKey::ContractStatusRollup)
-
             .unwrap_or(ContractStatusRollup {
-
                 tier: StatusTier::Ok,
 
                 asset_ok: 0,
@@ -5225,14 +5157,10 @@ impl BridgeWatchContract {
                 bridge_high: 0,
 
                 timestamp: env.ledger().timestamp(),
-
             });
 
-
         if let Some(p) = prev {
-
             match p {
-
                 StatusTier::Ok => rollup.bridge_ok = rollup.bridge_ok.saturating_sub(1),
 
                 StatusTier::Low => rollup.bridge_low = rollup.bridge_low.saturating_sub(1),
@@ -5240,14 +5168,10 @@ impl BridgeWatchContract {
                 StatusTier::Medium => rollup.bridge_medium = rollup.bridge_medium.saturating_sub(1),
 
                 StatusTier::High => rollup.bridge_high = rollup.bridge_high.saturating_sub(1),
-
             }
-
         }
 
-
         match next {
-
             StatusTier::Ok => rollup.bridge_ok += 1,
 
             StatusTier::Low => rollup.bridge_low += 1,
@@ -5255,39 +5179,27 @@ impl BridgeWatchContract {
             StatusTier::Medium => rollup.bridge_medium += 1,
 
             StatusTier::High => rollup.bridge_high += 1,
-
         }
-
 
         rollup.tier = Self::compute_contract_tier_from_counts(&rollup);
 
         rollup.timestamp = env.ledger().timestamp();
 
-
         env.storage()
-
             .persistent()
-
             .set(&DataKey::ContractStatusRollup, &rollup);
 
-
-        env.events().publish((symbol_short!("ctr_st"),), rollup.tier.clone());
-
+        env.events()
+            .publish((symbol_short!("ctr_st"),), rollup.tier.clone());
     }
 
-
     fn update_asset_rollup(env: &Env, asset_code: &String) {
-
         let health = Self::load_asset_health(env, asset_code);
 
         let deviation: Option<DeviationAlert> = env
-
             .storage()
-
             .persistent()
-
             .get(&DataKey::DeviationAlert(asset_code.clone()));
-
 
         let health_tier = Self::health_to_tier(health.health_score);
 
@@ -5295,33 +5207,22 @@ impl BridgeWatchContract {
 
         let mut tier = Self::max_tier(health_tier, deviation_tier.clone());
 
-
         if !health.active {
-
             tier = Self::max_tier(tier, StatusTier::Low);
-
         }
 
         if health.paused {
-
             tier = Self::max_tier(tier, StatusTier::Low);
-
         }
 
-
         let prev: Option<AssetStatusRollup> = env
-
             .storage()
-
             .persistent()
-
             .get(&DataKey::AssetStatusRollup(asset_code.clone()));
 
         let prev_tier = prev.as_ref().map(|r| r.tier.clone());
 
-
         let rollup = AssetStatusRollup {
-
             asset_code: asset_code.clone(),
 
             tier: tier.clone(),
@@ -5337,50 +5238,33 @@ impl BridgeWatchContract {
             active: health.active,
 
             timestamp: env.ledger().timestamp(),
-
         };
 
-
         env.storage()
-
             .persistent()
-
             .set(&DataKey::AssetStatusRollup(asset_code.clone()), &rollup);
-
 
         Self::bump_contract_counts_for_asset(env, prev_tier, tier.clone());
 
-        env.events().publish((symbol_short!("asset_st"), asset_code.clone()), tier);
-
+        env.events()
+            .publish((symbol_short!("asset_st"), asset_code.clone()), tier);
     }
 
-
     fn update_bridge_rollup(env: &Env, bridge_id: &String, mismatch_bps: i128, is_critical: bool) {
-
         let tier = if is_critical {
-
             StatusTier::High
-
         } else {
-
             StatusTier::Ok
-
         };
 
-
         let prev: Option<BridgeStatusRollup> = env
-
             .storage()
-
             .persistent()
-
             .get(&DataKey::BridgeStatusRollup(bridge_id.clone()));
 
         let prev_tier = prev.as_ref().map(|r| r.tier.clone());
 
-
         let rollup = BridgeStatusRollup {
-
             bridge_id: bridge_id.clone(),
 
             tier: tier.clone(),
@@ -5390,21 +5274,16 @@ impl BridgeWatchContract {
             is_critical,
 
             timestamp: env.ledger().timestamp(),
-
         };
 
-
         env.storage()
-
             .persistent()
-
             .set(&DataKey::BridgeStatusRollup(bridge_id.clone()), &rollup);
-
 
         Self::bump_contract_counts_for_bridge(env, prev_tier, tier.clone());
 
-        env.events().publish((symbol_short!("bridge_st"), bridge_id.clone()), tier);
-
+        env.events()
+            .publish((symbol_short!("bridge_st"), bridge_id.clone()), tier);
     }
 
     // -----------------------------------------------------------------------
@@ -5768,8 +5647,7 @@ impl BridgeWatchContract {
             .instance()
             .set(&keys::RISK_SCORE_CONFIG, &config);
 
-        env.events()
-            .publish((symbol_short!("risk_cfg"),), version);
+        env.events().publish((symbol_short!("risk_cfg"),), version);
         Self::maybe_create_auto_checkpoint(&env, &caller);
     }
 
@@ -5780,7 +5658,6 @@ impl BridgeWatchContract {
     pub fn get_risk_score_config(env: Env) -> RiskScoreConfig {
         Self::load_risk_score_config(&env)
     }
-}
 
     /// Pure deterministic calculation for the composite risk score.
     ///
@@ -5798,12 +5675,7 @@ impl BridgeWatchContract {
         volatility_bps: u32,
     ) -> RiskScoreResult {
         Self::validate_score_range(health_score, "health_score");
-        Self::build_risk_score_result(
-            &env,
-            health_score,
-            price_deviation_bps,
-            volatility_bps,
-        )
+        Self::build_risk_score_result(&env, health_score, price_deviation_bps, volatility_bps)
     }
 
     /// Derive a risk score for an asset from stored health and price history.
@@ -5826,11 +5698,7 @@ impl BridgeWatchContract {
         let volatility_bps = if prices.len() < 2 {
             0
         } else {
-            Self::clamp_i128_to_u32(Self::calculate_volatility(
-                env.clone(),
-                prices,
-                period_secs,
-            ))
+            Self::clamp_i128_to_u32(Self::calculate_volatility(env.clone(), prices, period_secs))
         };
 
         Some(Self::build_risk_score_result(
@@ -6867,7 +6735,10 @@ impl BridgeWatchContract {
         Self::append_u32(&mut data, snapshot.risk_score_config.health_weight_bps);
         Self::append_u32(&mut data, snapshot.risk_score_config.price_weight_bps);
         Self::append_u32(&mut data, snapshot.risk_score_config.volatility_weight_bps);
-        Self::append_u32(&mut data, snapshot.risk_score_config.max_price_deviation_bps);
+        Self::append_u32(
+            &mut data,
+            snapshot.risk_score_config.max_price_deviation_bps,
+        );
         Self::append_u32(&mut data, snapshot.risk_score_config.max_volatility_bps);
         Self::append_u32(&mut data, snapshot.risk_score_config.version);
 
@@ -7148,9 +7019,7 @@ impl BridgeWatchContract {
         max_volatility_bps: u32,
         version: u32,
     ) {
-        if health_weight_bps > 10_000
-            || price_weight_bps > 10_000
-            || volatility_weight_bps > 10_000
+        if health_weight_bps > 10_000 || price_weight_bps > 10_000 || volatility_weight_bps > 10_000
         {
             panic!("risk weights must be between 0 and 10000");
         }
@@ -7196,8 +7065,7 @@ impl BridgeWatchContract {
         let normalized_volatility_risk_bps =
             Self::normalize_signal_to_bps(volatility_bps, config.max_volatility_bps);
 
-        let weighted_sum = (normalized_health_risk_bps as u64)
-            * (config.health_weight_bps as u64)
+        let weighted_sum = (normalized_health_risk_bps as u64) * (config.health_weight_bps as u64)
             + (normalized_price_risk_bps as u64) * (config.price_weight_bps as u64)
             + (normalized_volatility_risk_bps as u64) * (config.volatility_weight_bps as u64);
         let risk_score_bps = Self::clamp_bps_u64(weighted_sum / 10_000);
@@ -7912,7 +7780,9 @@ impl BridgeWatchContract {
         }
         let now = env.ledger().timestamp();
         env.storage().instance().set(&keys::RECOVERY_MODE, &true);
-        env.storage().instance().set(&keys::RECOVERY_REASON, &reason);
+        env.storage()
+            .instance()
+            .set(&keys::RECOVERY_REASON, &reason);
         env.storage()
             .instance()
             .set(&keys::RECOVERY_ENTERED_AT, &now);
@@ -7924,8 +7794,10 @@ impl BridgeWatchContract {
         env.storage()
             .persistent()
             .set(&keys::RECOVERY_STEPS, &steps);
-        env.events()
-            .publish((symbol_short!("rec_entr"), caller.clone()), (reason.clone(), now));
+        env.events().publish(
+            (symbol_short!("rec_entr"), caller.clone()),
+            (reason.clone(), now),
+        );
         Self::append_replay_event(
             &env,
             String::from_str(&env, "rec_entr"),
@@ -8086,7 +7958,10 @@ impl BridgeWatchContract {
         for i in offset..end {
             page.push_back(log.get(i).unwrap());
         }
-        AdminActivityPage { entries: page, total }
+        AdminActivityPage {
+            entries: page,
+            total,
+        }
     }
 
     /// Retrieve admin activity entries for a specific actor (most-recent first).
@@ -8175,12 +8050,7 @@ impl BridgeWatchContract {
     /// # Panics
     /// - `caller` is not the contract admin.
     /// - `weight_bps` is zero.
-    pub fn register_health_source(
-        env: Env,
-        caller: Address,
-        source_id: String,
-        weight_bps: u32,
-    ) {
+    pub fn register_health_source(env: Env, caller: Address, source_id: String, weight_bps: u32) {
         caller.require_auth();
         let admin: Address = env.storage().instance().get(&keys::ADMIN).unwrap();
         if caller != admin {
@@ -8215,9 +8085,13 @@ impl BridgeWatchContract {
         if !found {
             updated.push_back(source);
         }
-        env.storage().instance().set(&keys::HEALTH_SOURCES, &updated);
-        env.events()
-            .publish((symbol_short!("src_reg"), caller.clone()), source_id.clone());
+        env.storage()
+            .instance()
+            .set(&keys::HEALTH_SOURCES, &updated);
+        env.events().publish(
+            (symbol_short!("src_reg"), caller.clone()),
+            source_id.clone(),
+        );
         Self::append_admin_activity(
             &env,
             AdminActivityAction::AssetRegistered,
@@ -8257,7 +8131,9 @@ impl BridgeWatchContract {
         if !found {
             panic!("health source not registered");
         }
-        env.storage().instance().set(&keys::HEALTH_SOURCES, &updated);
+        env.storage()
+            .instance()
+            .set(&keys::HEALTH_SOURCES, &updated);
         env.events()
             .publish((symbol_short!("src_rev"), caller), source_id);
     }
@@ -8309,9 +8185,10 @@ impl BridgeWatchContract {
             bridge_uptime_score,
             submitted_at: now,
         };
-        env.storage()
-            .persistent()
-            .set(&HealthSourceDataKey::Entry(source_id.clone(), asset_code.clone()), &entry);
+        env.storage().persistent().set(
+            &HealthSourceDataKey::Entry(source_id.clone(), asset_code.clone()),
+            &entry,
+        );
         env.events().publish(
             (symbol_short!("ms_hlth"), caller.clone(), asset_code.clone()),
             (source_id.clone(), health_score, now),
@@ -8531,14 +8408,14 @@ impl BridgeWatchContract {
         name: String,
     ) {
         caller.require_auth();
-        
+
         // Check admin permission
         let admin: Address = env
             .storage()
             .instance()
             .get(&keys::ADMIN)
             .unwrap_or_else(|| panic!("contract not initialized"));
-        
+
         if caller != admin {
             acl::require_permission(&env, &caller, &admin, &Permission::ManageConfig);
         }
@@ -8573,14 +8450,14 @@ impl BridgeWatchContract {
     /// ```
     pub fn revoke_trusted_source(env: Env, caller: Address, source_address: Address) {
         caller.require_auth();
-        
+
         // Check admin permission
         let admin: Address = env
             .storage()
             .instance()
             .get(&keys::ADMIN)
             .unwrap_or_else(|| panic!("contract not initialized"));
-        
+
         if caller != admin {
             acl::require_permission(&env, &caller, &admin, &Permission::ManageConfig);
         }
@@ -11439,7 +11316,9 @@ mod tests {
         env.ledger().set_timestamp(300);
         client.submit_price(&admin, &asset, &1_000_000, &source);
 
-        let result = client.get_asset_risk_score(&asset, &StatPeriod::Day).unwrap();
+        let result = client
+            .get_asset_risk_score(&asset, &StatPeriod::Day)
+            .unwrap();
         assert_eq!(result.health_score, 75);
         assert_eq!(result.price_deviation_bps, 0);
         assert_eq!(result.volatility_bps, 0);
@@ -12334,8 +12213,14 @@ mod tests {
         client.record_recovery_step(&admin, &String::from_str(&env, "step three"));
         let steps = client.get_recovery_steps();
         assert_eq!(steps.len(), 3);
-        assert_eq!(steps.get(0).unwrap().description, String::from_str(&env, "step one"));
-        assert_eq!(steps.get(2).unwrap().description, String::from_str(&env, "step three"));
+        assert_eq!(
+            steps.get(0).unwrap().description,
+            String::from_str(&env, "step one")
+        );
+        assert_eq!(
+            steps.get(2).unwrap().description,
+            String::from_str(&env, "step three")
+        );
     }
 
     #[test]
@@ -12435,8 +12320,14 @@ mod tests {
         client.exit_recovery_mode(&admin);
         let entries = client.get_admin_activity_by_actor(&admin, &10);
         // Most recent (RecoveryExited) should come first in the result
-        assert_eq!(entries.get(0).unwrap().action, AdminActivityAction::RecoveryExited);
-        assert_eq!(entries.get(1).unwrap().action, AdminActivityAction::RecoveryEntered);
+        assert_eq!(
+            entries.get(0).unwrap().action,
+            AdminActivityAction::RecoveryExited
+        );
+        assert_eq!(
+            entries.get(1).unwrap().action,
+            AdminActivityAction::RecoveryEntered
+        );
     }
 
     #[test]

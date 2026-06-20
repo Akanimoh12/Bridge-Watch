@@ -1,7 +1,7 @@
 import { type Page } from "@playwright/test";
-import { 
-  buildAssetWithHealth, 
-  buildBridge 
+import {
+  buildAssetWithHealth,
+  buildBridge
 } from "../../frontend/src/test/factories";
 
 const assetsFixture = [
@@ -16,8 +16,8 @@ const assetHealthFixture = {
 
 const bridgesFixture = {
   bridges: [
-    buildBridge({ name: "Stellar-Ethereum", status: "healthy" }, 200),
-    buildBridge({ name: "Stellar-Celo", status: "degraded" }, 201),
+    buildBridge({ name: "Allbridge", status: "healthy" }, 200),
+    buildBridge({ name: "Wormhole", status: "healthy" }, 201),
   ]
 };
 
@@ -45,7 +45,7 @@ export async function mockCoreApi(page: Page): Promise<void> {
     });
   });
 
-  await page.route("**/api/v1/bridges", async (route) => {
+  await page.route("**/api/v1/bridges**", async (route) => {
     await route.fulfill({
       status: 200,
       headers: jsonHeaders,
@@ -53,14 +53,32 @@ export async function mockCoreApi(page: Page): Promise<void> {
     });
   });
 
-  await page.route("**/health", async (route) => {
+  await page.route("**/health**", async (route) => {
     await route.fulfill({
       status: 200,
       headers: jsonHeaders,
       body: JSON.stringify({
         status: "ok",
         timestamp: new Date().toISOString(),
+        services: {},
       }),
+    });
+  });
+
+  await page.route("**/api/v1/external-dependencies**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      headers: jsonHeaders,
+      body: JSON.stringify({ dependencies: [], summary: { total: 0, healthy: 0, degraded: 0 } }),
+    });
+  });
+
+  // Catch-all for any other API routes to prevent proxy errors
+  await page.route("**/api/v1/**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      headers: jsonHeaders,
+      body: JSON.stringify({}),
     });
   });
 }

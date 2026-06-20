@@ -104,7 +104,10 @@ impl StateExportHelper {
         timestamp: u64,
     ) -> String {
         let mut hash_input = String::from_str(&env, "");
-        hash_input = String::from_str(&env, &format!("{}{}{}{}", asset_code, status, risk_score, timestamp));
+        hash_input = String::from_str(
+            &env,
+            &format!("{}{}{}{}", asset_code, status, risk_score, timestamp),
+        );
         hash_input
     }
 
@@ -228,16 +231,8 @@ impl StateExportHelper {
 
         let mut idx = 0;
         while idx < max_len {
-            let left_byte = if idx < left_len {
-                left_buf[idx]
-            } else {
-                0
-            };
-            let right_byte = if idx < right_len {
-                right_buf[idx]
-            } else {
-                0
-            };
+            let left_byte = if idx < left_len { left_buf[idx] } else { 0 };
+            let right_byte = if idx < right_len { right_buf[idx] } else { 0 };
 
             if left_byte != right_byte {
                 return if left_byte > right_byte { 1 } else { -1 };
@@ -369,9 +364,18 @@ mod tests {
 
         StateExportHelper::sort_snapshots(&env, &mut snapshots);
 
-        assert_eq!(snapshots.get(0).unwrap().asset_code, String::from_str(&env, "BTC"));
-        assert_eq!(snapshots.get(1).unwrap().asset_code, String::from_str(&env, "EURC"));
-        assert_eq!(snapshots.get(2).unwrap().asset_code, String::from_str(&env, "USDC"));
+        assert_eq!(
+            snapshots.get(0).unwrap().asset_code,
+            String::from_str(&env, "BTC")
+        );
+        assert_eq!(
+            snapshots.get(1).unwrap().asset_code,
+            String::from_str(&env, "EURC")
+        );
+        assert_eq!(
+            snapshots.get(2).unwrap().asset_code,
+            String::from_str(&env, "USDC")
+        );
     }
 
     #[test]

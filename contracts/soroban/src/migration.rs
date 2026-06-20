@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use soroban_sdk::{contracttype, symbol_short, Address, Env, String, Vec, vec};
+use soroban_sdk::{contracttype, symbol_short, vec, Address, Env, String, Vec};
 
 // Storage key constants for migration state — follows the same pattern as the
 // top-level `keys` mod in lib.rs.
@@ -74,7 +74,9 @@ impl MigrationHelper {
     /// Persist `version` as the current schema version.
     pub fn set_version(env: &Env, version: MigrationVersion) {
         let key = String::from_str(env, keys::MIGRATION_VERSION);
-        env.storage().persistent().set::<String, MigrationVersion>(&key, &version);
+        env.storage()
+            .persistent()
+            .set::<String, MigrationVersion>(&key, &version);
     }
 
     /// Validate that migrating `from` → `to` is a forward-only upgrade.
@@ -139,11 +141,7 @@ impl MigrationHelper {
     ///
     /// Event topics: `["migration", from_major, from_minor, from_patch]`
     /// Event data:   `[to_major, to_minor, to_patch]`
-    pub fn emit_migration_event(
-        env: &Env,
-        from: &MigrationVersion,
-        to: &MigrationVersion,
-    ) {
+    pub fn emit_migration_event(env: &Env, from: &MigrationVersion, to: &MigrationVersion) {
         env.events().publish(
             (
                 symbol_short!("migration"),

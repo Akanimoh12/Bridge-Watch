@@ -42,6 +42,11 @@ export const navGroups: NavGroup[] = [
         label: "Alert Sandbox",
         description: "Dry-run alert rules against synthetic data before enabling in production",
       },
+      {
+        to: "/admin/access-audit",
+        label: "Access Audit",
+        description: "Review operator roles, permissions, and access history",
+      },
       { to: "/settings", label: "Settings", description: "Notification and dashboard preferences" },
     ],
   },

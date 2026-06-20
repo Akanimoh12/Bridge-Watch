@@ -594,7 +594,7 @@ export default function DataProvenanceGraph() {
                   </defs>
 
                   {/* Column headers */}
-                  {(["source", "transform", "destination"] as ProvenanceNodeKind[]).map((kind, ci) => {
+                  {(["source", "transform", "destination"] as ProvenanceNodeKind[]).map((kind) => {
                     const cols = (["source", "transform", "destination"] as ProvenanceNodeKind[]).filter(
                       (k) => (graphData?.nodes ?? []).some((n) => n.kind === k)
                     );

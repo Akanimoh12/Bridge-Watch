@@ -221,10 +221,8 @@ impl CircuitBreakerContract {
             .instance()
             .set(&DataKey::Guardians, &guardians);
 
-        env.events().publish(
-            ("cb_guardian_added",),
-            (guardian, role),
-        );
+        env.events()
+            .publish(("cb_guardian_added",), (guardian, role));
     }
 
     pub fn remove_guardian(env: Env, caller: Address, guardian: Address) {
@@ -253,10 +251,7 @@ impl CircuitBreakerContract {
             .instance()
             .set(&DataKey::Guardians, &new_guardians);
 
-        env.events().publish(
-            ("cb_guardian_removed",),
-            guardian,
-        );
+        env.events().publish(("cb_guardian_removed",), guardian);
     }
 
     pub fn get_guardians(env: Env) -> Vec<GuardianInfo> {
@@ -387,10 +382,8 @@ impl CircuitBreakerContract {
             .instance()
             .set(&DataKey::RecoveryRequests, &recovery_requests);
 
-        env.events().publish(
-            ("cb_recovery_requested",),
-            (pause_id, caller),
-        );
+        env.events()
+            .publish(("cb_recovery_requested",), (pause_id, caller));
     }
 
     pub fn approve_recovery(env: Env, caller: Address, pause_id: u32) {
@@ -420,10 +413,8 @@ impl CircuitBreakerContract {
             .instance()
             .set(&DataKey::RecoveryRequests, &recovery_requests);
 
-        env.events().publish(
-            ("cb_guardian_approved",),
-            (pause_id, caller, "recovery"),
-        );
+        env.events()
+            .publish(("cb_guardian_approved",), (pause_id, caller, "recovery"));
     }
 
     pub fn execute_recovery(env: Env, caller: Address, pause_id: u32) {
@@ -464,10 +455,7 @@ impl CircuitBreakerContract {
             .persistent()
             .remove(&DataKey::PauseState(pause_id));
 
-        env.events().publish(
-            ("cb_recovery_executed",),
-            pause_id,
-        );
+        env.events().publish(("cb_recovery_executed",), pause_id);
     }
 
     // ── Trigger Configuration ─────────────────────────────────────────────────
@@ -517,7 +505,10 @@ impl CircuitBreakerContract {
             .unwrap_or(Vec::new(&env));
 
         let config = Self::get_config(&env);
-        assert!(whitelist.len() < config.max_whitelist_size, "whitelist full");
+        assert!(
+            whitelist.len() < config.max_whitelist_size,
+            "whitelist full"
+        );
 
         // Check if already exists
         for addr in whitelist.iter() {
@@ -531,10 +522,8 @@ impl CircuitBreakerContract {
             .instance()
             .set(&DataKey::WhitelistAddresses, &whitelist);
 
-        env.events().publish(
-            ("cb_whitelist_updated",),
-            ("address", address, true),
-        );
+        env.events()
+            .publish(("cb_whitelist_updated",), ("address", address, true));
     }
 
     pub fn add_asset_to_whitelist(env: Env, caller: Address, asset_code: String) {
@@ -547,7 +536,10 @@ impl CircuitBreakerContract {
             .unwrap_or(Vec::new(&env));
 
         let config = Self::get_config(&env);
-        assert!(whitelist.len() < config.max_whitelist_size, "whitelist full");
+        assert!(
+            whitelist.len() < config.max_whitelist_size,
+            "whitelist full"
+        );
 
         // Check if already exists
         for asset in whitelist.iter() {
@@ -561,10 +553,8 @@ impl CircuitBreakerContract {
             .instance()
             .set(&DataKey::WhitelistAssets, &whitelist);
 
-        env.events().publish(
-            ("cb_whitelist_updated",),
-            ("asset", asset_code, true),
-        );
+        env.events()
+            .publish(("cb_whitelist_updated",), ("asset", asset_code, true));
     }
 
     // ── Query Functions ───────────────────────────────────────────────────────
@@ -708,8 +698,7 @@ mod tests {
         (admin, guardian1, guardian2, user)
     }
 
-    fn setup(
-    ) -> (
+    fn setup() -> (
         Env,
         Address,
         CircuitBreakerContractClient<'static>,
@@ -731,7 +720,9 @@ mod tests {
 
         client.initialize(&admin, &2, &3600, &7200, &14400, &100);
 
-        let has_config = env.as_contract(&contract_id, || env.storage().instance().has(&DataKey::Config));
+        let has_config = env.as_contract(&contract_id, || {
+            env.storage().instance().has(&DataKey::Config)
+        });
         assert!(has_config);
     }
 
