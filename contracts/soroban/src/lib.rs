@@ -5443,7 +5443,7 @@ impl BridgeWatchContract {
         let deviation: Option<DeviationAlert> = env
             .storage()
             .persistent()
-            .get(&DataKey::DeviationAlert(asset_code.clone()));
+            .get(&AssetDataKey::DevAlert(asset_code.clone()));
 
         let health_tier = Self::health_to_tier(health.health_score);
 
