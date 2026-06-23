@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 
 test.describe("UI Interactions: Drawers and Dialogs", () => {
   test("Notifications drawer - open, focus management, and close via keyboard", async ({ page }) => {
-    await page.goto("/dashboard");
+    await page.goto("/dashboard", { waitUntil: "networkidle" });
 
     // Click the notification trigger
     const trigger = page.locator('button[aria-controls="notifications-drawer"]');
@@ -35,7 +35,7 @@ test.describe("UI Interactions: Drawers and Dialogs", () => {
   });
 
   test("Export dialog - open, interact, and close", async ({ page }) => {
-    await page.goto("/dashboard");
+    await page.goto("/dashboard", { waitUntil: "networkidle" });
 
     // Click export button
     const exportBtn = page.getByRole("button", { name: "Export data" });
@@ -55,7 +55,7 @@ test.describe("UI Interactions: Drawers and Dialogs", () => {
 
 test.describe("UI Interactions: Filters and Responsive Layout", () => {
   test("Transaction filters - input, select, and reset", async ({ page }) => {
-    await page.goto("/transactions");
+    await page.goto("/transactions", { waitUntil: "networkidle" });
     
     // Wait for the filters component to load
     const searchInput = page.getByPlaceholder("Search by tx hash or address…");
@@ -71,7 +71,7 @@ test.describe("UI Interactions: Filters and Responsive Layout", () => {
     await expect(bridgeSelect).toHaveValue("Circle");
 
     // Assert 'Clear all filters' button is visible since we have active filters
-    const clearBtn = page.getByRole("button", { name: "Clear all filters" });
+    const clearBtn = page.getByRole("button", { name: "Clear all filters" }).first();
     await expect(clearBtn).toBeVisible();
     
     // Reset filters

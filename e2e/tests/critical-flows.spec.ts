@@ -17,13 +17,14 @@ test("navigates landing to dashboard and renders core widgets", async ({ page })
 
   await landingPage.goto();
   await landingPage.openDashboard();
+  await page.waitForLoadState("networkidle");
   await dashboardPage.assertLoaded();
 });
 
 test("opens export dialog and interacts with dashboard toolbar", async ({ page }) => {
   const dashboardPage = new DashboardPage(page);
 
-  await page.goto("/dashboard");
+  await page.goto("/dashboard", { waitUntil: "networkidle" });
   await dashboardPage.assertLoaded();
   await dashboardPage.openExportDialog();
 

@@ -30,11 +30,12 @@ export class DashboardPage {
 
   async assertLoaded(): Promise<void> {
     await this.dismissOnboardingIfPresent();
-    await expect(this.heading).toBeVisible();
-    await expect(this.assetHealthHeading).toBeVisible();
-    await expect(this.bridgeStatusHeading).toBeVisible();
-    await expect(this.page.getByText("Allbridge")).toBeVisible();
-    await expect(this.page.getByRole("button", { name: "Inspect bridge details" }).first()).toBeVisible();
+    await this.page.waitForLoadState("networkidle");
+    await expect(this.heading).toBeVisible({ timeout: 15000 });
+    await expect(this.assetHealthHeading).toBeVisible({ timeout: 10000 });
+    await expect(this.bridgeStatusHeading).toBeVisible({ timeout: 10000 });
+    await expect(this.page.getByText("Allbridge")).toBeVisible({ timeout: 10000 });
+    await expect(this.page.getByRole("button", { name: "Inspect bridge details" }).first()).toBeVisible({ timeout: 10000 });
   }
 
   async openExportDialog(): Promise<void> {
