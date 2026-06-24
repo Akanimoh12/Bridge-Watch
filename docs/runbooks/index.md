@@ -24,6 +24,7 @@ These runbooks cover the full lifecycle of a live incident from initial alert th
 
 | Runbook | Description | Link |
 |---|---|---|
+| Support Handbook | Fast-reference troubleshooting, status checks, and escalation ownership for support and ops staff | [../support-handbook.md](../support-handbook.md) |
 | Incident Response Guide | Severity matrix, roles, communication templates, escalation policy, and postmortem workflow | [../incident-response-guide.md](../incident-response-guide.md) |
 | Incident Response Templates | Copy-paste triage, update, status page, and postmortem formats with owner/action fields | [incident-response-templates.md](incident-response-templates.md) |
 | Support Escalation Tree | Tiered support path, owner contacts, availability notes, and maintenance workflow for support escalation | [support-escalation-tree.md](support-escalation-tree.md) |
