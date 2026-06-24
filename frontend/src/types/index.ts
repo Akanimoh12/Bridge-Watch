@@ -488,3 +488,24 @@ export interface ProvenanceListItem {
   lastUpdated: string;
   nodeCount: number;
 }
+
+export interface AuditEvent {
+  id: string;
+  actorId: string;
+  actorType: "user" | "admin" | "system";
+  action: string;
+  resourceType: string;
+  resourceId: string;
+  ipAddress?: string;
+  userAgent?: string;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+  checksum: string;
+  previousChecksum?: string;
+}
+
+export interface RiskHistoryPoint {
+  timestamp: string;
+  score: number;
+}
+

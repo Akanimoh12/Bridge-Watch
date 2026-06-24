@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { AuditDetailModal } from './AuditDetailModal';
+import { AuditEvent } from '../../types';
 
 interface AuditTableProps {
-  filters: any;
+  filters: Record<string, string>;
 }
 
 export const AuditTable: React.FC<AuditTableProps> = ({ filters }) => {
-  const [events, setEvents] = useState<any[]>([]);
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [events, setEvents] = useState<AuditEvent[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<AuditEvent | null>(null);
 
   useEffect(() => {
     // In a real app, fetch from /api/audit with filters

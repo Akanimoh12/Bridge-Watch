@@ -15,6 +15,6 @@ export class BridgesPage {
   }
 
   async assertBridgeVisible(bridgeName: string): Promise<void> {
-    await expect(this.page.getByText(bridgeName)).toBeVisible();
+    await expect(this.page.getByRole("link", { name: `View details for bridge ${bridgeName}` })).toBeVisible();
   }
 }

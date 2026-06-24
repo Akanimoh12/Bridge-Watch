@@ -131,7 +131,7 @@ export default function Bridges() {
                 <SkeletonCard key={i} rows={6} ariaLabel={`Loading bridge card ${i}`} />
               ))}
             </div>
-          ) : data && data.bridges.length > 0 ? (
+          ) : data && data.bridges && data.bridges.length > 0 ? (
             filteredBridges.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredBridges.map((bridge) => (

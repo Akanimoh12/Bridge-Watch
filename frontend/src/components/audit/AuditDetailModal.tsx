@@ -1,7 +1,8 @@
 import React from 'react';
+import { AuditEvent } from '../../types';
 
 interface AuditDetailModalProps {
-  event: any;
+  event: AuditEvent;
   onClose: () => void;
 }
 

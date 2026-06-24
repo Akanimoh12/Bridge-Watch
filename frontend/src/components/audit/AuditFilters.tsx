@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface AuditFiltersProps {
-  onChange: (filters: any) => void;
+  onChange: (filters: Record<string, string>) => void;
 }
 
 export const AuditFilters: React.FC<AuditFiltersProps> = ({ onChange }) => {

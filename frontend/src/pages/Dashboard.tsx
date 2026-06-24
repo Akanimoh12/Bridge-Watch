@@ -668,7 +668,7 @@ export default function Dashboard() {
             value={
               bridgesLoading
                 ? "--"
-                : `$${bridgesData?.bridges
+                : `$${(bridgesData?.bridges ?? [])
                     .reduce((sum, b) => sum + b.totalValueLocked, 0)
                     .toLocaleString() || "0"}`
             }

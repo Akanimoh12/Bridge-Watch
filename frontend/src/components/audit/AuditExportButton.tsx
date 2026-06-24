@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface AuditExportButtonProps {
-  filters: any;
+  filters: Record<string, string>;
 }
 
 export const AuditExportButton: React.FC<AuditExportButtonProps> = ({ filters }) => {

@@ -1,6 +1,7 @@
 import React from 'react';
+import { RiskHistoryPoint } from '../../types';
 
-export const RiskTrendChart: React.FC<{ history: any[] }> = ({ history }) => {
+export const RiskTrendChart: React.FC<{ history: RiskHistoryPoint[] }> = ({ history }) => {
   // Simulating chart view using history
   const historyLength = history?.length ?? 0;
   return (

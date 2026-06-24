@@ -34,12 +34,12 @@ export class DashboardPage {
     await expect(this.heading).toBeVisible({ timeout: 15000 });
     await expect(this.assetHealthHeading).toBeVisible({ timeout: 10000 });
     await expect(this.bridgeStatusHeading).toBeVisible({ timeout: 10000 });
-    await expect(this.page.getByText("Allbridge")).toBeVisible({ timeout: 10000 });
+    await expect(this.page.getByRole("link", { name: "View details for bridge Allbridge" })).toBeVisible({ timeout: 10000 });
     await expect(this.page.getByRole("button", { name: "Inspect bridge details" }).first()).toBeVisible({ timeout: 10000 });
   }
 
   async openExportDialog(): Promise<void> {
     await this.exportDataButton.click();
-    await expect(this.page.getByText("Export data")).toBeVisible();
+    await expect(this.page.getByRole("heading", { name: "Export data" })).toBeVisible();
   }
 }

@@ -3,6 +3,33 @@ import { useQuery } from "@tanstack/react-query";
 
 const API = "/api/v1/admin/access-audit";
 
+interface AccessAuditEntry {
+  id?: string;
+  created_at?: string;
+  actor?: string;
+  action?: string;
+  role?: string;
+  target?: string;
+}
+
+interface AccessAuditMember {
+  id?: string;
+  member?: string;
+  address?: string;
+  role?: string;
+  assigned_at?: string;
+  assigned_by?: string;
+}
+
+interface AccessAuditSession {
+  id?: string;
+  user?: string;
+  user_id?: string;
+  status?: string;
+  created_at?: string;
+  expires_at?: string;
+}
+
 function StatsBar() {
   const { data } = useQuery({
     queryKey: ["access-audit-stats"],
@@ -55,7 +82,7 @@ function AccessChangesTab() {
     placeholderData: (prev) => prev,
   });
 
-  const entries: Record<string, any>[] = data?.entries ?? [];
+  const entries: AccessAuditEntry[] = data?.entries ?? [];
   const total: number = data?.total ?? 0;
   const totalPages = Math.ceil(total / limit);
 
@@ -134,7 +161,7 @@ function RolesTab() {
     queryFn: () => fetch(`${API}/roles`).then((r) => r.json()),
   });
 
-  const members: Record<string, any>[] = data?.members ?? [];
+  const members: AccessAuditMember[] = data?.members ?? [];
 
   return (
     <div className="overflow-x-auto rounded-md border">
@@ -186,7 +213,7 @@ function SessionsTab() {
     queryFn: () => fetch(`${API}/sessions?status=${statusFilter}`).then((r) => r.json()),
   });
 
-  const sessions: Record<string, any>[] = data?.sessions ?? [];
+  const sessions: AccessAuditSession[] = data?.sessions ?? [];
 
   return (
     <div>

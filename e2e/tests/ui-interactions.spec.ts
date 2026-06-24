@@ -4,6 +4,7 @@ import { mockCoreApi } from "../utils/mockApi";
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.localStorage.setItem("bridge-watch:onboarding:v1", "true");
+    window.localStorage.setItem("bridge-watch:dashboard-tour:v1", JSON.stringify({ completed: true, lastStep: 0, seen: true }));
   });
   await mockCoreApi(page);
 });
@@ -21,7 +22,7 @@ test.describe("UI Interactions: Drawers and Dialogs", () => {
     await expect(drawer).toBeVisible();
 
     // Verify focus is moved inside the drawer
-    const closeBtn = page.getByRole("button", { name: "Close notifications" });
+    const closeBtn = drawer.getByRole("button", { name: "Close notifications" });
     await expect(closeBtn).toBeVisible();
 
     // The close button or the first focusable element should be focused
@@ -71,7 +72,7 @@ test.describe("UI Interactions: Filters and Responsive Layout", () => {
     await expect(bridgeSelect).toHaveValue("Circle");
 
     // Assert 'Clear all filters' button is visible since we have active filters
-    const clearBtn = page.getByRole("button", { name: "Clear all filters" }).first();
+    const clearBtn = page.getByTestId("clear-all-filters-btn");
     await expect(clearBtn).toBeVisible();
     
     // Reset filters
