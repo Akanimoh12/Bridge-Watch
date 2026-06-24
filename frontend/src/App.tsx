@@ -21,6 +21,7 @@ const Transactions = lazy(() => import("./pages/Transactions"));
 const ApiKeys = lazy(() => import("./pages/ApiKeys"));
 const AlertRoutingAdmin = lazy(() => import("./pages/AlertRoutingAdmin"));
 const SupplyChain = lazy(() => import("./pages/SupplyChain"));
+const BridgeTopologyExplorer = lazy(() => import("./pages/BridgeTopologyExplorer"));
 const Reconciliation = lazy(() => import("./pages/Reconciliation"));
 const ApiDocs = lazy(() => import("./pages/ApiDocs"));
 const Help = lazy(() => import("./pages/Help"));
@@ -78,6 +79,7 @@ function App() {
               <Route path="/admin/alert-routing" element={<AlertRoutingAdmin />} />
               <Route path="/admin/access-audit" element={<OperationalAccessAudit />} />
               <Route path="/supply-chain" element={<SupplyChain />} />
+              <Route path="/bridge-topology" element={<BridgeTopologyExplorer />} />
               <Route path="/reconciliation" element={<Reconciliation />} />
               <Route path="/api-docs" element={<ApiDocs />} />
               <Route path="/help" element={<Help />} />
