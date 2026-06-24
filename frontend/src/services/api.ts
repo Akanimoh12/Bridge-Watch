@@ -794,6 +794,8 @@ export function runScheduledExportNow(id: string) {
   return fetchApi<{ export: ExportRecord }>(`/exports/schedules/${id}/run`, {
     method: "POST",
   });
+}
+
 // Incidents / Heatmap
 export interface HeatmapBucket {
   date: string;
@@ -829,4 +831,42 @@ export function getIncidentHeatmap(params?: {
     dateRange: { start: string; end: string };
     assets: string[];
   }>(`/incidents/heatmap${qs ? `?${qs}` : ""}`);
+}
+
+export type IncidentReplayEventType =
+  | "incident_created"
+  | "ingestion"
+  | "status_change"
+  | "enrichment"
+  | "resolution";
+
+export interface IncidentReplayEvent {
+  id: string;
+  timestamp: string;
+  eventType: IncidentReplayEventType;
+  title: string;
+  description: string;
+  severity?: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface IncidentReplayTimeline {
+  incidentId: string;
+  incident: {
+    id: string;
+    bridgeId: string;
+    assetCode: string | null;
+    severity: string;
+    status: string;
+    title: string;
+    description: string;
+    occurredAt: string;
+    resolvedAt: string | null;
+  };
+  events: IncidentReplayEvent[];
+  durationMs: number;
+}
+
+export function getIncidentReplayTimeline(incidentId: string) {
+  return fetchApi<IncidentReplayTimeline>(`/incidents/${encodeURIComponent(incidentId)}/replay`);
 }
