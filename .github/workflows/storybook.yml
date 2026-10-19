@@ -53,9 +53,11 @@ jobs:
 
       - name: Run Storybook visual regression tests
         working-directory: frontend
-        run: npm run test:visual -- tests/visual/storybook.spec.ts
+        run: npm run test:visual -- tests/visual/storybook.spec.ts --project=chromium
         env:
           CI: "true"
+          PLAYWRIGHT_BASE_URL: "http://127.0.0.1:6006"
+          PLAYWRIGHT_SERVER_CMD: "npx vite preview --outDir storybook-static --port 6006 --host 127.0.0.1"
           VISUAL_DIFF_THRESHOLD: "0.01"
 
       - name: Upload visual test failure artifacts

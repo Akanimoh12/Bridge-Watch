@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import DataTable from "./DataTable";
+import { DataTable } from "./DataTable";
 import type { DataTableColumnDef } from "./types";
 
 interface SampleBridge {

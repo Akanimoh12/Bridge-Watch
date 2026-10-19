@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { buildBridge } from "../../src/test/factories";
 
 test.describe("PWA offline capabilities and offline indicator", () => {
   test("shows offline indicator banner and displays cached bridge data when offline", async ({
@@ -12,13 +13,14 @@ test.describe("PWA offline capabilities and offline indicator", () => {
         contentType: "application/json",
         body: JSON.stringify({
           bridges: [
-            {
-              id: "bridge-eth",
+            buildBridge({
               name: "Stellar-Ethereum Bridge",
               status: "healthy",
               totalValueLocked: 50000000,
-              volume24h: 4000000,
-            },
+              supplyOnStellar: 50000000,
+              supplyOnSource: 50000000,
+              mismatchPercentage: 0,
+            }),
           ],
         }),
       });
@@ -27,7 +29,7 @@ test.describe("PWA offline capabilities and offline indicator", () => {
     // Navigate to Bridges page while online
     await page.goto("/bridges");
     await expect(page.locator("h1")).toHaveText("Bridges");
-    await expect(page.getByText("Stellar-Ethereum Bridge")).toBeVisible();
+    await expect(page.getByText("Stellar-Ethereum Bridge").first()).toBeVisible();
 
     // Verify offline indicator is NOT visible while online
     await expect(page.locator('[data-testid="offline-indicator"]')).not.toBeVisible();

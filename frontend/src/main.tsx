@@ -51,8 +51,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   </React.StrictMode>
 );
 
-// Register service worker for offline bridge monitoring and asset caching
-if (typeof window !== "undefined" && "serviceWorker" in navigator && process.env.NODE_ENV !== "test") {
+// Register service worker for offline bridge monitoring and asset caching (production only)
+if (typeof window !== "undefined" && "serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("/sw.js")

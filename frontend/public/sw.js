@@ -9,6 +9,13 @@ const STATIC_ASSETS = [
   "/favicon.svg",
 ];
 
+const CRITICAL_API_PATTERNS = [
+  /\/api\/v1\/bridges/,
+  /\/api\/v1\/assets/,
+  /\/api\/v1\/analytics/,
+  /\/api\/v1\/health/,
+];
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
@@ -37,7 +44,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
 
   // Handle API Requests (Bridges and Assets health caching)
-  if (url.pathname.startsWith("/api/")) {
+  if (CRITICAL_API_PATTERNS.some((pattern) => pattern.test(url.pathname))) {
     if (request.method === "GET") {
       event.respondWith(
         fetch(request)

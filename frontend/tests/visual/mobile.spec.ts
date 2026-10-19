@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { buildBridge } from "../../src/test/factories";
 
 test.describe("Mobile viewport responsiveness and visual regression", () => {
   // Mobile device viewport (375x667 - iPhone SE / standard mobile)
@@ -6,6 +7,16 @@ test.describe("Mobile viewport responsiveness and visual regression", () => {
     viewport: { width: 375, height: 667 },
     isMobile: true,
     hasTouch: true,
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem("bridge-watch:onboarding:v1", "true");
+      window.localStorage.setItem(
+        "bridge-watch:dashboard-tour:v1",
+        JSON.stringify({ completed: true, lastStep: 0, seen: true })
+      );
+    });
   });
 
   test("Dashboard mobile layout stacks vertically and maintains touch targets", async ({ page }) => {
@@ -23,20 +34,22 @@ test.describe("Mobile viewport responsiveness and visual regression", () => {
         contentType: "application/json",
         body: JSON.stringify({
           bridges: [
-            {
-              id: "bridge-1",
+            buildBridge({
               name: "Stellar-Ethereum Bridge",
               status: "healthy",
               totalValueLocked: 45000000,
-              volume24h: 3200000,
-            },
-            {
-              id: "bridge-2",
+              supplyOnStellar: 45000000,
+              supplyOnSource: 45000000,
+              mismatchPercentage: 0,
+            }),
+            buildBridge({
               name: "Stellar-Polygon Bridge",
               status: "healthy",
               totalValueLocked: 18000000,
-              volume24h: 1200000,
-            },
+              supplyOnStellar: 18000000,
+              supplyOnSource: 18000000,
+              mismatchPercentage: 0,
+            }),
           ],
         }),
       });
@@ -71,20 +84,22 @@ test.describe("Mobile viewport responsiveness and visual regression", () => {
         contentType: "application/json",
         body: JSON.stringify({
           bridges: [
-            {
-              id: "bridge-1",
+            buildBridge({
               name: "Stellar-Ethereum Bridge",
               status: "healthy",
               totalValueLocked: 45000000,
-              volume24h: 3200000,
-            },
-            {
-              id: "bridge-2",
+              supplyOnStellar: 45000000,
+              supplyOnSource: 45000000,
+              mismatchPercentage: 0,
+            }),
+            buildBridge({
               name: "Stellar-Polygon Bridge",
               status: "healthy",
               totalValueLocked: 18000000,
-              volume24h: 1200000,
-            },
+              supplyOnStellar: 18000000,
+              supplyOnSource: 18000000,
+              mismatchPercentage: 0,
+            }),
           ],
         }),
       });
