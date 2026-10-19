@@ -183,6 +183,17 @@ const envSchema = z.object({
   EXPORT_MAX_DATE_RANGE_DAYS: z.coerce.number().default(90),
   EXPORT_STREAMING_MAX_ROWS: z.coerce.number().default(0),
 
+  // Worker Queue Concurrency Configuration
+  // High-throughput queues
+  QUEUE_CONCURRENCY_BRIDGE_TRANSACTION: z.coerce.number().default(10),
+  QUEUE_CONCURRENCY_PRICE_AGGREGATOR: z.coerce.number().default(10),
+  // CPU-intensive queues
+  QUEUE_CONCURRENCY_ANALYTICS_AGGREGATION: z.coerce.number().default(2),
+  // I/O-bound queues
+  QUEUE_CONCURRENCY_WEBHOOK_DELIVERY: z.coerce.number().default(20),
+  // Default for other queues
+  QUEUE_CONCURRENCY_DEFAULT: z.coerce.number().default(5),
+
   // Email Configuration
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().default(587),
