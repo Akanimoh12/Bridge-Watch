@@ -37,6 +37,8 @@ export async function buildServer() {
         strict: false,
       },
     },
+    // Default body size limit (1MB) - can be overridden per-route
+    bodyLimit: config.BODY_LIMIT_DEFAULT,
   });
 
   // Register shared schemas referenced via $ref in route definitions
@@ -96,6 +98,49 @@ export async function buildServer() {
       return callback(null, false);
     },
     credentials: true,
+  });
+
+  // Content-Length validation middleware - prevents oversized payloads before body parsing
+  server.addHook("onRequest", async (request, reply) => {
+    const contentLength = request.headers["content-length"];
+    if (contentLength) {
+      const length = parseInt(contentLength, 10);
+      if (isNaN(length) || length < 0) {
+        reply.code(400).send({ 
+          error: "Bad Request", 
+          message: "Invalid Content-Length header" 
+        });
+        return;
+      }
+      // Check against route-specific limit if set, otherwise use default
+      const routeLimit = (request.routeOptions?.config?.bodyLimit as number) || config.BODY_LIMIT_DEFAULT;
+      if (length > routeLimit) {
+        reply.code(413).send({ 
+          error: "Payload Too Large", 
+          message: `Request body exceeds maximum allowed size of ${routeLimit} bytes` 
+        });
+        return;
+      }
+    }
+  });
+
+  // Set higher body limits for specific routes that need it
+  server.addHook("onRoute", (routeOptions) => {
+    const path = routeOptions.url;
+    if (path) {
+      // Higher limits for bulk operations, imports, uploads
+      if (path.includes("/bulk") || path.includes("/import") || path.includes("/upload") || path.includes("/batch")) {
+        routeOptions.config = {
+          ...routeOptions.config,
+          bodyLimit: config.BODY_LIMIT_BULK_IMPORT,
+        };
+      } else if (path.includes("/upload") || path.includes("/file")) {
+        routeOptions.config = {
+          ...routeOptions.config,
+          bodyLimit: config.BODY_LIMIT_UPLOAD,
+        };
+      }
+    }
   });
 
   await registerCompatibilityMiddleware(server as any);
