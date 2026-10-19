@@ -39,6 +39,11 @@ export interface BridgeWatchSdkConfig {
    * correlate SDK calls with the caller's trace.
    */
   tracing?: TraceContextOptions;
+  /** Optional hooks around compatibility API requests and responses. */
+  interceptors?: {
+    onRequest?: (request: Request) => Request | Promise<Request>;
+    onResponse?: (response: Response) => Response | Promise<Response>;
+  };
 }
 
 

@@ -69,6 +69,7 @@ export class BridgeWatchContractSdk {
     Pick<BridgeWatchSdkConfig, "tracing">;
   private readonly retryConfig: Required<ClientRetryConfig>;
   private readonly server: StellarSdk.rpc.Server;
+  private readonly interceptors: NonNullable<BridgeWatchSdkConfig["interceptors"]>;
   private connected = false;
 
   /**
@@ -122,6 +123,7 @@ export class BridgeWatchContractSdk {
     this.server = new StellarSdk.rpc.Server(this.config.rpcUrl, {
       allowHttp: this.config.allowHttp,
     });
+    this.interceptors = config.interceptors ?? {};
   }
 
   /**
@@ -188,7 +190,13 @@ export class BridgeWatchContractSdk {
     let attempt = 0;
 
     while (true) {
-      const response = await fetch(url, { headers });
+      const request = await this.interceptors.onRequest?.(
+        new Request(url, { headers })
+      ) ?? new Request(url, { headers });
+      const rawResponse = await fetch(request);
+      const response = this.interceptors.onResponse
+        ? await this.interceptors.onResponse(rawResponse)
+        : rawResponse;
 
       if (response.ok) {
         return response.json() as Promise<T>;
