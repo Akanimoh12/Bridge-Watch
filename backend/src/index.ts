@@ -1,5 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import helmet from "@fastify/helmet";
+import websocket from "@fastify/websocket";
 import websocket from "@fastify/websocket";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
@@ -79,6 +81,21 @@ export async function buildServer() {
 
   // Register graceful shutdown drain protection middleware
   await registerDrainProtectionMiddleware(server as any);
+
+  // Register security headers (helmet)
+  await server.register(helmet, {
+    contentSecurityPolicy: false,
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    frameguard: {
+      action: "deny",
+    },
+    noSniff: true,
+    xFrameOptions: { action: "deny" },
+  });
 
   // Register plugins
   await server.register(cors, {
