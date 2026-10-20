@@ -101,6 +101,11 @@ const envSchema = z.object({
   LOG_SENSITIVE_DATA: z.coerce.boolean().default(false),
   REQUEST_SLOW_THRESHOLD_MS: z.coerce.number().default(1000),
 
+  // Body size limits (in bytes)
+  BODY_LIMIT_DEFAULT: z.coerce.number().default(1048576), // 1MB default
+  BODY_LIMIT_UPLOAD: z.coerce.number().default(10485760), // 10MB for uploads
+  BODY_LIMIT_BULK_IMPORT: z.coerce.number().default(52428800), // 50MB for bulk imports
+
   // Rate Limiting
   RATE_LIMIT_MAX: z.coerce.number().default(100),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000),
