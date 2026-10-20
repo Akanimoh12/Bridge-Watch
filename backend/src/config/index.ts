@@ -84,7 +84,9 @@ const envSchema = z.object({
   JWT_SECRET: z.string().optional(),
   JWT_ISSUER: z.string().default("bridge-watch-api"),
   JWT_AUDIENCE: z.string().default("bridge-watch-api"),
-  JWT_TTL_SECONDS: z.coerce.number().default(3600),
+  JWT_TTL_SECONDS: z.coerce.number().default(3600), // 1 hour access token TTL
+  JWT_REFRESH_TTL_SECONDS: z.coerce.number().default(604800), // 7 days refresh token TTL
+  JWT_REFRESH_ROTATION: z.coerce.boolean().default(true), // Rotate refresh token on use
 
   // Logging
   LOG_LEVEL: z
